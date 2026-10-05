@@ -1,0 +1,86 @@
+<div class="mx-auto max-w-3xl">
+  <form class="card bg-base-100 shadow" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="card-body grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="md:col-span-2 rounded-box bg-secondary px-4 py-3 text-secondary-content">
+        <h2 class="text-2xl font-bold">{{ isEdit() ? 'Editar vehículo' : 'Nuevo vehículo' }}</h2>
+        <p class="opacity-90">Completa los datos del automóvil.</p>
+      </div>
+      <div class="field">
+        <span class="field-label">Marca</span>
+        <input class="input input-bordered" formControlName="brand" />
+      </div>
+      <div class="field">
+        <span class="field-label">Modelo</span>
+        <input class="input input-bordered" formControlName="model" />
+      </div>
+      <div class="field">
+        <span class="field-label">Año</span>
+        <input class="input input-bordered" type="number" formControlName="year" />
+      </div>
+      <div class="field">
+        <span class="field-label">Placa</span>
+        <input class="input input-bordered" formControlName="licensePlate" />
+      </div>
+      <div class="field">
+        <span class="field-label">VIN</span>
+        <input class="input input-bordered" formControlName="vin" />
+      </div>
+      <div class="field">
+        <span class="field-label">Color</span>
+        <input class="input input-bordered" formControlName="color" />
+      </div>
+      <div class="field">
+        <span class="field-label">Kilometraje</span>
+        <input class="input input-bordered" type="number" formControlName="currentMileage" />
+      </div>
+      <div class="field md:col-span-2">
+        <span class="field-label">Notas</span>
+        <textarea class="textarea textarea-bordered" rows="3" formControlName="notes"></textarea>
+      </div>
+
+      <div class="field md:col-span-2">
+        <span class="field-label">Fotos del vehículo</span>
+        <input
+          class="file-input file-input-bordered w-full"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          (change)="onFilesSelected($event)"
+        />
+        <p class="text-xs opacity-70">JPG, PNG o WEBP. Máximo 8 fotos y 5 MB cada una.</p>
+        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          @for (photo of savedPhotos(); track photo.id) {
+            <div class="relative overflow-hidden rounded-box border border-base-300">
+              <img class="h-28 w-full object-cover" [src]="vehiclesApi.photoSrc(photo.url)" alt="Foto del vehículo" />
+              <button class="btn btn-error btn-xs absolute top-2 right-2" type="button" (click)="removeSaved(photo.id)">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          }
+          @for (photo of pendingPhotos(); track photo.id) {
+            <div class="relative overflow-hidden rounded-box border border-base-300">
+              <img class="h-28 w-full object-cover" [src]="photo.preview" alt="Vista previa" />
+              <button class="btn btn-error btn-xs absolute top-2 right-2" type="button" (click)="removePending(photo.id)">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (error()) {
+        <div class="alert alert-error md:col-span-2">{{ error() }}</div>
+      }
+
+      <div class="card-actions justify-end md:col-span-2">
+        <a class="btn btn-ghost" routerLink="/vehicles">Cancelar</a>
+        <button class="btn btn-primary" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading loading-spinner"></span>
+          }
+          Guardar
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

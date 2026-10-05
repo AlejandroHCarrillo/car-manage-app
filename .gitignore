@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/node_modules/
+**/dist/
+**/.angular/
+*.user
+*.suo
+*.cache
+.env
+appsettings.Production.json
+**/wwwroot/uploads/

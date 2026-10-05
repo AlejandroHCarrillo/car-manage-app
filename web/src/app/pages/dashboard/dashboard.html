@@ -1,0 +1,85 @@
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-bold">Panel</h2>
+    <p class="opacity-70">
+      @if (auth.isAdmin()) {
+        Resumen de la plataforma y todos los vehículos registrados.
+      } @else {
+        Resumen de los vehículos que tienes asignados.
+      }
+    </p>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure text-primary"><i class="fa-solid fa-car text-2xl"></i></div>
+      <div class="stat-title">Vehículos</div>
+      <div class="stat-value text-primary">{{ stats()?.totalVehicles ?? 0 }}</div>
+    </div>
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure text-secondary"><i class="fa-solid fa-users text-2xl"></i></div>
+      <div class="stat-title">{{ auth.isAdmin() ? 'Usuarios' : 'Gestores' }}</div>
+      <div class="stat-value text-secondary">{{ stats()?.totalUsers ?? 0 }}</div>
+    </div>
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure text-accent"><i class="fa-solid fa-wrench text-2xl"></i></div>
+      <div class="stat-title">Mantenimientos</div>
+      <div class="stat-value">{{ stats()?.totalMaintenanceRecords ?? 0 }}</div>
+    </div>
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure"><i class="fa-solid fa-wallet text-2xl"></i></div>
+      <div class="stat-title">Costo acumulado</div>
+      <div class="stat-value text-lg">{{ stats()?.totalMaintenanceCost ?? 0 | currency }}</div>
+    </div>
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure text-warning"><i class="fa-solid fa-file-signature text-2xl"></i></div>
+      <div class="stat-title">Trámites pendientes</div>
+      <div class="stat-value text-warning">{{ stats()?.pendingProcedures ?? 0 }}</div>
+    </div>
+    <div class="stat rounded-box bg-base-100 shadow">
+      <div class="stat-figure text-error"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
+      <div class="stat-title">Trámites vencidos</div>
+      <div class="stat-value text-error">{{ stats()?.overdueProcedures ?? 0 }}</div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <div class="flex items-center justify-between">
+        <h3 class="card-title">Vehículos recientes</h3>
+        <a class="btn btn-ghost btn-sm" routerLink="/vehicles">Ver todos</a>
+      </div>
+
+      @if (loading()) {
+        <div class="flex justify-center py-8"><span class="loading loading-spinner loading-lg"></span></div>
+      } @else if (vehicles().length === 0) {
+        <p class="py-6 opacity-70">Aún no hay vehículos para mostrar.</p>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Vehículo</th>
+                <th>Placa</th>
+                <th>Kilometraje</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (vehicle of vehicles(); track vehicle.id) {
+                <tr>
+                  <td>{{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.year }})</td>
+                  <td>{{ vehicle.licensePlate }}</td>
+                  <td>{{ vehicle.currentMileage | number }} km</td>
+                  <td class="text-right">
+                    <a class="btn btn-ghost btn-xs" [routerLink]="['/vehicles', vehicle.id]">Detalle</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,280 @@
+@if (vehicle(); as current) {
+  <div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 class="text-2xl font-bold">{{ current.brand }} {{ current.model }}</h2>
+        <p class="opacity-70">{{ current.year }} · {{ current.color }} · {{ current.licensePlate }}</p>
+      </div>
+      <div class="flex gap-2">
+        <a class="btn btn-outline btn-sm" [routerLink]="['/vehicles', current.id, 'edit']">
+          <i class="fa-solid fa-pen"></i>
+          Editar
+        </a>
+        @if (auth.isAdmin()) {
+          <button class="btn btn-error btn-sm" type="button" (click)="removeVehicle()">
+            <i class="fa-solid fa-trash"></i>
+            Eliminar
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body space-y-3">
+        <h3 class="card-title">Fotos</h3>
+        @if ((current.photos ?? []).length === 0) {
+          <p class="opacity-70">Aún no hay fotos. Agrégalas desde la ficha de captura.</p>
+        } @else {
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            @for (photo of current.photos; track photo.id) {
+              <a class="overflow-hidden rounded-box border border-base-300" [href]="vehiclesApi.photoSrc(photo.url)" target="_blank" rel="noopener">
+                <img class="h-36 w-full object-cover" [src]="vehiclesApi.photoSrc(photo.url)" alt="Foto del vehículo" />
+              </a>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+      <div class="card bg-base-100 shadow lg:col-span-2">
+        <div class="card-body">
+          <h3 class="card-title">Ficha técnica</h3>
+          <dl class="grid gap-3 sm:grid-cols-2">
+            <div><dt class="text-sm opacity-70">VIN</dt><dd>{{ current.vin || 'No registrado' }}</dd></div>
+            <div><dt class="text-sm opacity-70">Kilometraje</dt><dd>{{ current.currentMileage | number }} km</dd></div>
+            <div class="sm:col-span-2"><dt class="text-sm opacity-70">Notas</dt><dd>{{ current.notes || 'Sin notas' }}</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h3 class="card-title">Gestores</h3>
+          @if (current.managers.length === 0) {
+            <p class="text-sm opacity-70">Sin gestores asignados.</p>
+          }
+          <ul class="space-y-2">
+            @for (manager of current.managers; track manager.id) {
+              <li class="flex items-center justify-between gap-2">
+                <div>
+                  <p class="font-medium">{{ manager.fullName }}</p>
+                  <p class="text-xs opacity-70">{{ manager.email }}</p>
+                </div>
+                @if (auth.isAdmin()) {
+                  <button class="btn btn-ghost btn-xs" type="button" (click)="unassign(manager.id)">Quitar</button>
+                }
+              </li>
+            }
+          </ul>
+          @if (auth.isAdmin()) {
+            <div class="mt-4 flex gap-2">
+              <select class="select select-bordered select-sm flex-1" [value]="selectedManagerId()" (change)="selectedManagerId.set($any($event.target).value)">
+                <option value="">Asignar gestor</option>
+                @for (manager of availableManagers(); track manager.id) {
+                  <option [value]="manager.id">{{ manager.firstName }} {{ manager.lastName }}</option>
+                }
+              </select>
+              <button class="btn btn-primary btn-sm" type="button" (click)="assign()">Asignar</button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="card-title">Documentos</h3>
+          <button class="btn btn-ghost btn-sm" type="button" (click)="documentModal.set(true)">
+            <i class="fa-solid fa-plus"></i>
+            Subir
+          </button>
+        </div>
+        @if ((current.documents ?? []).length === 0) {
+          <p class="opacity-70">Aún no hay documentos. Sube la póliza, tenencia, factura u otro archivo.</p>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Tipo</th>
+                  <th>Emisión</th>
+                  <th>Vigencia</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (document of current.documents; track document.id) {
+                  <tr>
+                    <td>
+                      <div class="flex items-center gap-3">
+                        @if (vehiclesApi.isImage(document.contentType)) {
+                          <img class="h-12 w-12 rounded-box object-cover" [src]="vehiclesApi.photoSrc(document.url)" [alt]="document.title" />
+                        } @else {
+                          <i class="fa-solid {{ vehiclesApi.documentIcon(document.contentType) }} text-2xl opacity-60"></i>
+                        }
+                        <div>
+                          <p class="font-medium">{{ document.title }}</p>
+                          <p class="text-xs opacity-70">{{ document.fileName }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ vehiclesApi.documentKindLabel(document.kind) }}</td>
+                    <td>{{ document.issuedOn ? (document.issuedOn | date: 'mediumDate') : '—' }}</td>
+                    <td>
+                      @if (document.expiresOn) {
+                        <span [class.text-error]="isExpired(document.expiresOn)">{{ document.expiresOn | date: 'mediumDate' }}</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td class="text-right">
+                      <a class="btn btn-ghost btn-xs" [href]="vehiclesApi.photoSrc(document.url)" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      </a>
+                      <button class="btn btn-ghost btn-xs" type="button" (click)="removeDocument(document.id)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="card-title">Trámites</h3>
+          <button class="btn btn-ghost btn-sm" type="button" (click)="procedureModal.set(true)">
+            <i class="fa-solid fa-plus"></i>
+            Nuevo
+          </button>
+        </div>
+        @if (procedures().length === 0) {
+          <p class="opacity-70">No hay trámites registrados para este vehículo.</p>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Trámite</th>
+                  <th>Periodicidad</th>
+                  <th>Vence</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of procedures(); track item.id) {
+                  <tr>
+                    <td>{{ item.title }}</td>
+                    <td>{{ proceduresApi.frequencyLabel(item.frequency) }}</td>
+                    <td>{{ item.dueDate | date: 'mediumDate' }}</td>
+                    <td>
+                      <span class="badge" [class]="proceduresApi.statusBadge(item.status)">{{ proceduresApi.statusLabel(item.status) }}</span>
+                    </td>
+                    <td class="text-right">
+                      <a class="btn btn-ghost btn-xs" [routerLink]="['/procedures', item.id]">Ver</a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="card-title">Mantenimientos</h3>
+          <button class="btn btn-ghost btn-sm" type="button" (click)="maintenanceModal.set(true)">
+            <i class="fa-solid fa-plus"></i>
+            Registrar
+          </button>
+        </div>
+
+        @if (records().length === 0) {
+          <p class="opacity-70">No hay mantenimientos registrados.</p>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Servicio</th>
+                  <th>Km</th>
+                  <th>Costo</th>
+                  <th>Registró</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (record of records(); track record.id) {
+                  <tr>
+                    <td>{{ record.serviceDate | date: 'mediumDate' }}</td>
+                    <td>
+                      <p class="font-medium">{{ record.title }}</p>
+                      <p class="text-xs opacity-70">{{ record.description }}</p>
+                    </td>
+                    <td>{{ record.mileage | number }}</td>
+                    <td>{{ record.cost | currency }}</td>
+                    <td>{{ record.createdByName }}</td>
+                    <td>
+                      <button class="btn btn-ghost btn-xs" type="button" (click)="removeMaintenance(record.id)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <app-modal [open]="procedureModal()" (closed)="procedureModal.set(false)">
+      @if (procedureModal()) {
+        <app-procedure-editor
+          variant="modal"
+          [vehicleId]="current.id"
+          [lockVehicle]="true"
+          (saved)="onProcedureSaved()"
+          (cancelled)="procedureModal.set(false)"
+        />
+      }
+    </app-modal>
+
+    <app-modal size="md" [open]="maintenanceModal()" (closed)="maintenanceModal.set(false)">
+      @if (maintenanceModal()) {
+        <app-maintenance-editor
+          variant="modal"
+          [vehicleId]="current.id"
+          [defaultMileage]="current.currentMileage"
+          (saved)="onMaintenanceSaved()"
+          (cancelled)="maintenanceModal.set(false)"
+        />
+      }
+    </app-modal>
+
+    <app-modal [open]="documentModal()" (closed)="documentModal.set(false)">
+      <app-document-editor
+        [vehicleId]="current.id"
+        (saved)="onDocumentSaved()"
+        (cancelled)="documentModal.set(false)"
+      />
+    </app-modal>
+  </div>
+}

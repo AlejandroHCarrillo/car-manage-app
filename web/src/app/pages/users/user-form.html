@@ -1,0 +1,53 @@
+<div class="mx-auto max-w-2xl">
+  <form class="card bg-base-100 shadow" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="card-body grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="md:col-span-2 rounded-box bg-secondary px-4 py-3 text-secondary-content">
+        <h2 class="text-2xl font-bold">{{ isEdit() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+        <p class="opacity-90">Define si será administrador de la plataforma o gestor de vehículos.</p>
+      </div>
+      <div class="field">
+        <span class="field-label">Nombre</span>
+        <input class="input input-bordered" formControlName="firstName" />
+      </div>
+      <div class="field">
+        <span class="field-label">Apellido</span>
+        <input class="input input-bordered" formControlName="lastName" />
+      </div>
+      <div class="field md:col-span-2">
+        <span class="field-label">Correo</span>
+        <input class="input input-bordered" type="email" formControlName="email" />
+      </div>
+      <div class="field">
+        <span class="field-label">{{ isEdit() ? 'Nueva contraseña (opcional)' : 'Contraseña' }}</span>
+        <input class="input input-bordered" type="password" formControlName="password" />
+      </div>
+      <div class="field">
+        <span class="field-label">Rol</span>
+        <select class="select select-bordered" formControlName="role">
+          <option value="Admin">Administrador de la plataforma</option>
+          <option value="VehicleManager">Gestor de vehículos</option>
+        </select>
+      </div>
+      @if (isEdit()) {
+        <div class="flex items-center gap-3 md:col-span-2">
+          <input class="toggle toggle-primary" id="isActive" type="checkbox" formControlName="isActive" />
+          <label class="field-label cursor-pointer" for="isActive">Cuenta activa</label>
+        </div>
+      }
+
+      @if (error()) {
+        <div class="alert alert-error md:col-span-2">{{ error() }}</div>
+      }
+
+      <div class="card-actions justify-end md:col-span-2">
+        <a class="btn btn-ghost" routerLink="/users">Cancelar</a>
+        <button class="btn btn-primary" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading loading-spinner"></span>
+          }
+          Guardar
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

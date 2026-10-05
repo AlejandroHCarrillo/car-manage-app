@@ -1,0 +1,64 @@
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold">Vehículos</h2>
+      <p class="opacity-70">
+        @if (auth.isAdmin()) {
+          Todos los automóviles de la plataforma.
+        } @else {
+          Los automóviles que tienes asignados.
+        }
+      </p>
+    </div>
+    <a class="btn btn-primary" routerLink="/vehicles/new">
+      <i class="fa-solid fa-plus"></i>
+      Nuevo vehículo
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-16"><span class="loading loading-spinner loading-lg"></span></div>
+  } @else if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  } @else if (vehicles().length === 0) {
+    <div class="card bg-base-100 shadow">
+      <div class="card-body items-center text-center">
+        <i class="fa-solid fa-car text-4xl opacity-40"></i>
+        <p>No hay vehículos registrados todavía.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      @for (vehicle of vehicles(); track vehicle.id) {
+        <article class="card bg-base-100 shadow">
+          <a class="block" [routerLink]="['/vehicles', vehicle.id]">
+            @if (vehicle.photos?.[0]; as cover) {
+              <figure>
+                <img class="h-40 w-full object-cover" [src]="vehiclesApi.photoSrc(cover.url)" [alt]="vehicle.brand + ' ' + vehicle.model" />
+              </figure>
+            } @else {
+              <figure class="flex h-40 items-center justify-center bg-base-200">
+                <i class="fa-solid fa-car text-4xl opacity-30"></i>
+              </figure>
+            }
+          </a>
+          <div class="card-body">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="card-title">{{ vehicle.brand }} {{ vehicle.model }}</h3>
+                <p class="text-sm opacity-70">{{ vehicle.year }} · {{ vehicle.color }}</p>
+              </div>
+              <span class="badge badge-primary badge-outline">{{ vehicle.licensePlate }}</span>
+            </div>
+            <p class="text-sm"><i class="fa-solid fa-road mr-2"></i>{{ vehicle.currentMileage | number }} km</p>
+            <p class="text-sm"><i class="fa-solid fa-user-group mr-2"></i>{{ vehicle.managers.length }} gestor(es)</p>
+            <div class="card-actions justify-end">
+              <a class="btn btn-ghost btn-sm" [routerLink]="['/vehicles', vehicle.id, 'edit']">Editar</a>
+              <a class="btn btn-primary btn-sm" [routerLink]="['/vehicles', vehicle.id]">Detalle</a>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

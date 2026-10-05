@@ -1,0 +1,56 @@
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold">Usuarios</h2>
+      <p class="opacity-70">Administra las cuentas de la plataforma y los gestores de vehículos.</p>
+    </div>
+    <a class="btn btn-primary" routerLink="/users/new">
+      <i class="fa-solid fa-user-plus"></i>
+      Nuevo usuario
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-16"><span class="loading loading-spinner loading-lg"></span></div>
+  } @else if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  } @else {
+    <div class="card bg-base-100 shadow">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Vehículos</th>
+              <th>Alta</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ auth.roleLabel(user.role) }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="user.isActive" [class.badge-ghost]="!user.isActive">
+                    {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>{{ user.vehicleIds.length }}</td>
+                <td>{{ user.createdAt | date: 'mediumDate' }}</td>
+                <td class="text-right">
+                  <a class="btn btn-ghost btn-xs" [routerLink]="['/users', user.id, 'edit']">Editar</a>
+                  <button class="btn btn-ghost btn-xs" type="button" (click)="remove(user)">Eliminar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

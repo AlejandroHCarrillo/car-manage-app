@@ -1,0 +1,71 @@
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold">Trámites</h2>
+      <p class="opacity-70">Gestiona pagos, revisiones y gestiones únicas o periódicas de tus vehículos.</p>
+    </div>
+    <a class="btn btn-primary" routerLink="/procedures/new">
+      <i class="fa-solid fa-plus"></i>
+      Nuevo trámite
+    </a>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <button class="btn btn-sm" [class.btn-primary]="filter() === 'open'" type="button" (click)="filter.set('open')">Pendientes</button>
+    <button class="btn btn-sm" [class.btn-primary]="filter() === 'overdue'" type="button" (click)="filter.set('overdue')">Vencidos</button>
+    <button class="btn btn-sm" [class.btn-primary]="filter() === 'completed'" type="button" (click)="filter.set('completed')">Completados</button>
+    <button class="btn btn-sm" [class.btn-primary]="filter() === 'all'" type="button" (click)="filter.set('all')">Todos</button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-16"><span class="loading loading-spinner loading-lg"></span></div>
+  } @else if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  } @else if (visible().length === 0) {
+    <div class="card bg-base-100 shadow">
+      <div class="card-body items-center text-center">
+        <i class="fa-solid fa-file-circle-check text-4xl opacity-40"></i>
+        <p>No hay trámites en este filtro.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="card bg-base-100 shadow">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Trámite</th>
+              <th>Vehículo</th>
+              <th>Periodicidad</th>
+              <th>Vence</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of visible(); track item.id) {
+              <tr>
+                <td>
+                  <p class="font-medium">{{ item.title }}</p>
+                  <p class="text-xs opacity-70">{{ item.description }}</p>
+                </td>
+                <td>
+                  <p>{{ item.vehicleName }}</p>
+                  <p class="text-xs opacity-70">{{ item.licensePlate }}</p>
+                </td>
+                <td>{{ api.frequencyLabel(item.frequency) }}</td>
+                <td>{{ item.dueDate | date: 'mediumDate' }}</td>
+                <td>
+                  <span class="badge" [class]="api.statusBadge(item.status)">{{ api.statusLabel(item.status) }}</span>
+                </td>
+                <td class="text-right">
+                  <a class="btn btn-ghost btn-xs" [routerLink]="['/procedures', item.id]">Detalle</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

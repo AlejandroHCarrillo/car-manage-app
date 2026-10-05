@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: corporate --default, luxury --prefersdark;
+}
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.field .input,
+.field .select,
+.field .textarea {
+  width: 100%;
+}

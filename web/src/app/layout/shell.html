@@ -1,0 +1,75 @@
+<div class="drawer lg:drawer-open min-h-screen">
+  <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content flex min-h-screen flex-col bg-base-200">
+    <div class="navbar border-b border-base-300 bg-base-100 px-4 shadow-sm">
+      <div class="flex-none lg:hidden">
+        <label for="app-drawer" class="btn btn-square btn-ghost" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars"></i>
+        </label>
+      </div>
+      <div class="flex-1">
+        <h1 class="text-lg font-semibold">Personal Car Garage</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden text-right sm:block">
+          <p class="text-sm font-semibold">
+            {{ auth.user()?.firstName }} {{ auth.user()?.lastName }}
+          </p>
+          <p class="text-xs opacity-70">{{ auth.roleLabel(auth.user()?.role) }}</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" (click)="auth.logout()">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Salir
+        </button>
+      </div>
+    </div>
+
+    <main class="flex-1 p-4 md:p-8">
+      <router-outlet />
+    </main>
+  </div>
+
+  <div class="drawer-side z-40">
+    <label for="app-drawer" class="drawer-overlay" aria-label="Cerrar menú"></label>
+    <aside class="flex min-h-full w-72 flex-col bg-neutral text-neutral-content">
+      <div class="flex items-center gap-3 px-6 py-6">
+        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-content">
+          <i class="fa-solid fa-car-side text-lg"></i>
+        </span>
+        <div>
+          <p class="font-bold leading-tight">Personal Car Garage</p>
+          <p class="text-xs opacity-70">Administración de automóviles</p>
+        </div>
+      </div>
+
+      <ul class="menu gap-1 px-3 text-base">
+        <li>
+          <a routerLink="/" routerLinkActive="bg-primary text-primary-content" [routerLinkActiveOptions]="{ exact: true }">
+            <i class="fa-solid fa-gauge-high w-5"></i>
+            Panel
+          </a>
+        </li>
+        <li>
+          <a routerLink="/vehicles" routerLinkActive="bg-primary text-primary-content">
+            <i class="fa-solid fa-car w-5"></i>
+            Vehículos
+          </a>
+        </li>
+        <li>
+          <a routerLink="/procedures" routerLinkActive="bg-primary text-primary-content">
+            <i class="fa-solid fa-file-signature w-5"></i>
+            Trámites
+          </a>
+        </li>
+        @if (auth.isAdmin()) {
+          <li>
+            <a routerLink="/users" routerLinkActive="bg-primary text-primary-content">
+              <i class="fa-solid fa-users w-5"></i>
+              Usuarios
+            </a>
+          </li>
+        }
+      </ul>
+    </aside>
+  </div>
+</div>

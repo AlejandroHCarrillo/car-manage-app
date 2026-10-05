@@ -1,0 +1,9 @@
+<div class="mx-auto max-w-2xl">
+  <app-procedure-editor
+    [procedureId]="procedureId()"
+    [vehicleId]="vehicleId()"
+    variant="page"
+    (saved)="onSaved($event)"
+    (cancelled)="onCancelled()"
+  />
+</div>

@@ -1,0 +1,12 @@
+<dialog #dialogRef class="modal" (close)="onNativeClose()">
+  <div
+    class="modal-box overflow-hidden p-0"
+    [class.max-w-xl]="size() === 'md'"
+    [class.max-w-2xl]="size() === 'lg'"
+  >
+    <ng-content />
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button type="submit">Cerrar</button>
+  </form>
+</dialog>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PersonalCarGarage.Api/PersonalCarGarage.Api.csproj" />
+  <Project Path="PersonalCarGarage.Application/PersonalCarGarage.Application.csproj" />
+  <Project Path="PersonalCarGarage.Domain/PersonalCarGarage.Domain.csproj" />
+  <Project Path="PersonalCarGarage.Infrastructure/PersonalCarGarage.Infrastructure.csproj" />
+</Solution>
